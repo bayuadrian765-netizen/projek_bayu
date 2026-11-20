@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp - Chat Romantis Ayang ❤️</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome untuk ikon WhatsApp -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Library Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #dadbd4;
+            background-image: linear-gradient(to bottom, #00a884 130px, #dadbd4 130px);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+        }
+
+        /* Container WhatsApp Web Style */
+        .whatsapp-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            max-height: 850px;
+            background: #efeae2;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .whatsapp-container {
+                border-radius: 12px;
+                height: 90vh;
+            }
+        }
+
+        /* WhatsApp Header */
+        .wa-header {
+            background: #008069;
+            color: white;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .wa-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .wa-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dfe5e7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #555;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wa-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .wa-text-info h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .wa-text-info span {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .wa-header-icons {
+            display: flex;
+            gap: 16px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            align-items: center;
+        }
+
+        .wa-header-icons i {
+            cursor: pointer;
+        }
+
+        /* Chat Body / Wallpaper WhatsApp Menggunakan wa.jpeg */
+        .wa-chat-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('wa.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Encrypted Notice */
+        .encryption-notice {
+            background: rgba(255, 238, 205, 0.9);
+            color: #4a3b0c;
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 4px auto 12px auto;
+            max-width: 90%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Chat Bubbles */
+        .message-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 2px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-row.incoming {
+            justify-content: flex-start;
+        }
+
+        .message-row.outgoing {
+            justify-content: flex-end;
+        }
+
+        .bubble {
+            max-width: 80%;
+            padding: 8px 12px 6px 12px;
+            border-radius: 7.5px;
+            font-size: 0.92rem;
+            position: relative;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        /* Background putih sedikit transparan di sini (0.85 artinya transparan 15%) */
+        .incoming .bubble {
+            background: rgba(255, 255, 255, 0.85); 
+            color: #111;
+            border-top-left-radius: 0;
+            backdrop-filter: blur(4px); /* Memberikan efek blur halus di belakang bubble */
+        }
+
+        .outgoing .bubble {
+            background: rgba(217, 253, 211, 0.90);
+            color: #111;
+            border-top-right-radius: 0;
+        }
+
+        .bubble-time {
+            font-size: 0.65rem;
+            color: #667781;
+            float: right;
+            margin-left: 8px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .bubble-time .fa-check-double {
+            color: #53bdeb;
+        }
+
+        /* Interactive Elements Inside Chat */
+        .chat-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .chat-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1.5px solid #00a884;
+            color: #008069;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chat-btn:hover {
+            background: #f0fdf4;
+        }
+
+        .hint-badge {
+            background: rgba(255, 228, 230, 0.9);
+            color: #e11d48;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 6px;
+            font-weight: 500;
+            border: 1px dashed #fda4af;
+        }
+
+        /* Battery Widget in Chat */
+        .chat-widget {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .battery-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #008069;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: #e2e8f0;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            width: 20%;
+            height: 100%;
+            background: #00a884;
+            transition: width 1s ease;
+        }
+
+        /* Ticket Card in Chat */
+        .chat-ticket {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 253, 244, 0.95) 100%);
+            border: 1.5px dashed #00a884;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 6px;
+        }
+
+        .chat-ticket h4 {
+            color: #008069;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .chat-ticket p {
+            font-size: 0.82rem;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* WhatsApp Footer / Input Bar */
+        .wa-footer {
+            background: #f0f2f5;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .wa-footer i {
+            font-size: 1.25rem;
+            color: #54656f;
+            cursor: pointer;
+        }
+
+        .wa-input-box {
+            flex: 1;
+            background: #ffffff;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #667781;
+            border: none;
+        }
+
+        /* INCOMING CALL SCREEN OVERLAY */
+        .call-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0b141a 0%, #111b21 100%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 50px 20px;
+            color: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .call-screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .caller-info {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .caller-avatar-large {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: #202c33;
+            margin: 0 auto 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #00a884;
+            border: 3px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 25px rgba(0, 168, 132, 0.3);
+            overflow: hidden;
+        }
+
+        .caller-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .caller-info h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .caller-info p {
+            font-size: 0.85rem;
+            color: #8696a0;
+            letter-spacing: 1px;
+        }
+
+        .call-actions {
+            display: flex;
+            gap: 50px;
+            margin-bottom: 40px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .call-btn-action {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: pulseCall 1.5s infinite;
+        }
+
+        @keyframes pulseCall {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-reject {
+            background: #ea4335;
+        }
+
+        .btn-accept {
+            background: #34a853;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio mengarah ke .mp3 -->
+    <audio id="bgMusic" src="musik.mp3" loop></audio>
+    <audio id="ringtoneAudio" src="nada_dering.mp3" loop></audio>
+
+    <div class="whatsapp-container">
+        <!-- WhatsApp Header -->
+        <div class="wa-header">
+            <div class="wa-user-info">
+                <div class="wa-avatar">
+                    <img src="wa.jpeg" alt="Bayu">
+                </div>
+                <div class="wa-text-info">
+                    <h3>bayu ❤️</h3>
+                    <span id="wa-status">online</span>
+                </div>
+            </div>
+            <div class="wa-header-icons">
+                <!-- Tombol Musik Latar -->
+                <i class="fa-solid fa-music" id="musicToggleBtn" onclick="toggleMusic()" title="Putar/Matikan Musik"></i>
+                <i class="fa-solid fa-video" onclick="triggerCall()"></i>
+                <i class="fa-solid fa-phone" onclick="triggerCall()"></i>
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+            </div>
+        </div>
+
+        <!-- Chat Body -->
+        <div class="wa-chat-body" id="chat-body">
+            <div class="encryption-notice">
+                <i class="fa-solid fa-lock"></i> Pesan dan panggilan bersifat end-to-end encrypted. Tidak seorang pun di luar chat ini, bahkan WhatsApp, dapat membaca atau mendengarkannya.
+            </div>
+
+            <!-- Pesan 1: Sapaan Awal & Pilihan Mood -->
+            <div class="message-row incoming" id="msg-1">
+                <div class="bubble">
+                    Haiii, seng! ❤️<br><br>
+                    bayu tahu dua malam ini seng begadang sampe kurang bobo. coba jujur sama bayu... gimana keadaan seng sekarang?
+                    
+                    <div class="chat-options" id="options-container">
+                        <button class="chat-btn" onclick="selectMood('capek')">
+                            <span>Capek banget, butuh rebahan total 🛌</span>
+                            <i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i>
+                        </button>
+                        <button class="chat-btn" onclick="selectMood('kangen')">
+                            <span>Kangen bayuu, mau jumpa biar langsung ilang capeknya 🤭</span>
+                            <i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i>
+                        </button>
+                    </div>
+                    <div style="text-align: center;">
+                        <span class="hint-badge">💡 coba klik yang atas dulu seng</span>
+                    </div>
+
+                    <div class="bubble-time">
+                        08.00 <i class="fa-solid fa-check-double"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp Input Footer -->
+        <div class="wa-footer">
+            <i class="fa-regular fa-face-smile"></i>
+            <i class="fa-solid fa-paperclip"></i>
+            <input type="text" class="wa-input-box" value="Ketik pesan..." disabled>
+            <i class="fa-solid fa-microphone" style="color: #008069;"></i>
+        </div>
+
+        <!-- PANGGILAN TELEPON WHATSAPP (POPUP) -->
+        <div class="call-screen" id="callScreen">
+            <div class="caller-info">
+                <div class="caller-avatar-large">
+                    <img src="wa.jpeg" alt="Bayu">
+                </div>
+                <h2>Bayu ❤️</h2>
+                <p id="call-status-text">Panggilan suara WhatsApp...</p>
+            </div>
+
+            <div class="call-actions">
+                <button class="call-btn-action btn-reject" onclick="endCallAndShowTicket()">
+                    <i class="fa-solid fa-phone-slash"></i>
+                </button>
+                <button class="call-btn-action btn-accept" onclick="endCallAndShowTicket()">
+                    <i class="fa-solid fa-phone"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script JavaScript -->
+    <script>
+        let userMoodsChosen = [];
+        let isMusicPlaying = false;
+        let wasMusicPlayingBeforeCall = false;
+
+        const textCapek = "bayu mau bilang kalau seng keren dua malam ini buat ngerjain kerjaan sampai begadang dan kurang tidur. coba kalau bayu diposisi seng yang dua malam itu pasti bayu gk bisa kuat kayak seng!, ehh tapi kek nya bayu juga bisa kuat sama keren kek seng soalnya nemenin seng aja bayu gk ada tidur sampe pagi kan seng heheheheh,, Tapi juga ingat sama kesehatan seng juga, apalagi mulai sekarang seng suka makan telat mulu dan gak pernah sarapan. Ini malam jangan begadang ya seng, kita bobo cepat biar istirahat ❤️";
+
+        const textKangen = "bayu juga kangen sama seng, kerna seng kan pasti cape kerna banyak kerjaan jadi bayu mau ngajak keluar minggu, yang uda kita rencanain biar hilang cape nya walupun seng kalau keluar sama bayu habis energi nyaaaaaa, semoga minggu gak hujan pas kita mau keluar ya seng";
+
+        function toggleMusic() {
+            const music = document.getElementById('bgMusic');
+            const iconBtn = document.getElementById('musicToggleBtn');
+            
+            if (!isMusicPlaying) {
+                music.play().then(() => {
+                    isMusicPlaying = true;
+                    iconBtn.style.color = '#ffeb3b';
+                }).catch(e => {
+                    alert("Gagal memutar musik. Pastikan file musik.mp3 ada di folder yang sama!");
+                });
+            } else {
+                music.pause();
+                isMusicPlaying = false;
+                iconBtn.style.color = 'white';
+            }
+        }
+
+        function selectMood(moodType) {
+            if (!isMusicPlaying) {
+                const music = document.getElementById('bgMusic');
+                music.play().then(() => {
+                    isMusicPlaying = true;
+                    document.getElementById('musicToggleBtn').style.color = '#ffeb3b';
+                }).catch(e => {});
+            }
+
+            if (userMoodsChosen.includes(moodType)) return;
+
+            userMoodsChosen.push(moodType);
+
+            const chatBody = document.getElementById('chat-body');
+            const timeStr = getCurrentTime();
+
+            const userReply = document.createElement('div');
+            userReply.className = 'message-row outgoing';
+            userReply.innerHTML = `
+                <div class="bubble">
+                    ${moodType === 'capek' ? 'Capek banget, butuh rebahan total 🛌' : 'Kangen bayu, mau jumpa biar langsung ilang capeknya 🤭'}
+                    <div class="bubble-time">${timeStr} <i class="fa-solid fa-check-double"></i></div>
+                </div>
+            `;
+            chatBody.appendChild(userReply);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            const hintBadge = document.querySelector('.hint-badge');
+            if (hintBadge) hintBadge.style.display = 'none';
+
+            setTimeout(() => {
+                const isAllChosen = userMoodsChosen.length === 2;
+
+                if (moodType === 'capek') {
+                    typeBayuMessage(
+                        "",
+                        textCapek,
+                        !isAllChosen ? 'kangen' : null,
+                        isAllChosen
+                    );
+                } else if (moodType === 'kangen') {
+                    typeBayuMessage(
+                        "",
+                        textKangen,
+                        !isAllChosen ? 'capek' : null,
+                        isAllChosen
+                    );
+                }
+            }, 600);
+        }
+
+        function typeBayuMessage(headerHtml, fullText, nextOptionToOffer, shouldTriggerBattery) {
+            const chatBody = document.getElementById('chat-body');
+            const timeStr = getCurrentTime();
+            const uniqueId = 'typing-' + Date.now();
+
+            const bayuMsgRow = document.createElement('div');
+            bayuMsgRow.className = 'message-row incoming';
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'bubble';
+            bubbleDiv.innerHTML = `
+                ${headerHtml}<span id="${uniqueId}"></span><span id="cursor-${uniqueId}" style="animation: blink 1s infinite">|</span>
+                <div id="next-opt-${uniqueId}"></div>
+                <div class="bubble-time">${timeStr} <i class="fa-solid fa-check-double"></i></div>
+            `;
+            bayuMsgRow.appendChild(bubbleDiv);
+            chatBody.appendChild(bayuMsgRow);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            let i = 0;
+            const targetEl = document.getElementById(uniqueId);
+            const cursorEl = document.getElementById('cursor-' + uniqueId);
+            
+            function typeWriter() {
+                if (i < fullText.length) {
+                    targetEl.innerHTML += fullText.charAt(i);
+                    i++;
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                    setTimeout(typeWriter, 30);
+                } else {
+                    if (cursorEl) cursorEl.remove();
+
+                    if (nextOptionToOffer) {
+                        const nextOptContainer = document.getElementById('next-opt-' + uniqueId);
+                        if (nextOptionToOffer === 'kangen') {
+                            nextOptContainer.innerHTML = `
+                                <div class="chat-options" style="margin-top: 12px;">
+                                    <button class="chat-btn" onclick="selectMood('kangen')">
+                                        <span>Kangen kamu, jadi langsung ilang capeknya 🤭</span>
+                                        <i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </div>
+                            `;
+                        } else if (nextOptionToOffer === 'capek') {
+                            nextOptContainer.innerHTML = `
+                                <div class="chat-options" style="margin-top: 12px;">
+                                    <button class="chat-btn" onclick="selectMood('capek')">
+                                        <span>Capek banget, butuh rebahan total 🛌</span>
+                                        <i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        chatBody.scrollTop = chatBody.scrollHeight;
+                    }
+
+                    if (shouldTriggerBattery) {
+                        setTimeout(() => {
+                            showBatteryWidget();
+                        }, 1000);
+                    }
+                }
+            }
+            typeWriter();
+        }
+
+        function showBatteryWidget() {
+            const chatBody = document.getElementById('chat-body');
+            const timeStr = getCurrentTime();
+
+            const widgetRow = document.createElement('div');
+            widgetRow.className = 'message-row incoming';
+            widgetRow.innerHTML = `
+                <div class="bubble" style="width: 100%;">
+                    Yuk kita isi ulang dulu energi semangat seng biar full lagi! ⚡
+                    <div class="chat-widget">
+                        <span class="battery-label" id="bat-label">🔋 Energi seng: 20% (Low Battery)</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="bat-fill"></div>
+                        </div>
+                        <button class="chat-btn" style="background:#00a884; color:white; justify-content:center; text-align:center;" onclick="rechargeBattery()">
+                            <span>Isi Ulang Energi Sekarang ⚡</span>
+                        </button>
+                    </div>
+                    <div class="bubble-time">${timeStr} <i class="fa-solid fa-check-double"></i></div>
+                </div>
+            `;
+            chatBody.appendChild(widgetRow);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function rechargeBattery() {
+            document.getElementById('bat-fill').style.width = '100%';
+            document.getElementById('bat-label').innerText = '🔋 Energi seng: 100% (Full Bahagia & Siap Kencan!)';
+            document.getElementById('bat-label').style.color = '#16a34a';
+
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            setTimeout(() => {
+                triggerCall();
+            }, 1500);
+        }
+
+        function triggerCall() {
+            const music = document.getElementById('bgMusic');
+            wasMusicPlayingBeforeCall = isMusicPlaying;
+
+            if (isMusicPlaying) {
+                music.pause();
+            }
+
+            const callScreen = document.getElementById('callScreen');
+            callScreen.classList.add('active');
+            document.getElementById('wa-status').innerText = 'berdering...';
+            
+            const ringtone = document.getElementById('ringtoneAudio');
+            ringtone.currentTime = 0;
+            ringtone.play().catch(e => {
+                console.log("Gagal memutar ringtone.");
+            });
+        }
+
+        function endCallAndShowTicket() {
+            const ringtone = document.getElementById('ringtoneAudio');
+            ringtone.pause();
+            ringtone.currentTime = 0;
+
+            const music = document.getElementById('bgMusic');
+            if (wasMusicPlayingBeforeCall) {
+                music.play().catch(e => {});
+            }
+
+            const callScreen = document.getElementById('callScreen');
+            callScreen.classList.remove('active');
+            document.getElementById('wa-status').innerText = 'online';
+
+            const chatBody = document.getElementById('chat-body');
+            const timeStr = getCurrentTime();
+
+            const ticketMsg = document.createElement('div');
+            ticketMsg.className = 'message-row incoming';
+            ticketMsg.innerHTML = `
+                <div class="bubble" style="width: 100%;">
+                    Yeay! Telepon terhubung & panggilan selesai. Nih Bayu kirimin tiket spesial buat hari Minggu nanti! 💌✨
+                    <div class="chat-ticket">
+                        <div style="background: #008069; color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 8px; font-weight: 500;">
+                            <i class="fa-solid fa-ticket"><span> VIP SUNDAY DATE PASS</span></i>
+                        </div>
+                        <h4>✨ Special Date with Bayu</h4>
+                        <p>Tiket VIP ini resmi berlaku untuk: <strong>Photobox berdua di Zad</strong>, sama <strong>makan di Raymie</strong> 🥰💖</p>
+                        <button class="chat-btn" style="margin-top: 10px; justify-content:center; background:#008069; color:white; border:none;" onclick="claimFinalTicket()">
+                            <span>Klaim & Simpan Tiket ❤️</span>
+                        </button>
+                    </div>
+                    <div class="bubble-time">${timeStr} <i class="fa-solid fa-check-double"></i></div>
+                </div>
+            `;
+            chatBody.appendChild(ticketMsg);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function claimFinalTicket() {
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.5 }
+            });
+            alert('Tiket berhasil diklaim dan disimpan! Sampai ketemu hari Minggu ya seng! 🥰💖');
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${hours}.${minutes}`;
+        }
+    </script>
+</body>
+</html>
